@@ -5,56 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Color Shuffle - 第34弾</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #e0f7fa; font-family: sans-serif; touch-action: none; }
-        #ad-top, #ad-bottom { position: fixed; left: 0; width: 100%; height: 150px; background: #333; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        * { box-sizing: border-box; }
+        body { margin: 0; overflow: hidden; background: #e0f7fa; font-family: sans-serif; touch-action: none; position: fixed; width: 100%; height: 100%; }
+        
+        /* 広告枠：100px */
+        #ad-top, #ad-bottom { position: fixed; left: 0; width: 100%; height: 100px; background: #333; z-index: 100; display: flex; align-items: center; justify-content: center; }
         #ad-top { top: 0; } #ad-bottom { bottom: 0; }
-        iframe { border: none; width: 100%; height: 150px; }
-        #main-container { margin-top: 150px; height: calc(100vh - 300px); position: relative; display: flex; flex-direction: column; align-items: center; }
-        #ui { padding: 10px; font-size: 22px; font-weight: bold; color: #00838f; }
-        #instruction { font-size: 28px; font-weight: bold; color: #00838f; margin-bottom: 20px; }
-        #color-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 10px; }
+        iframe { border: none; width: 100%; height: 100px; }
+
+        /* ゲーム本体エリア */
+        #game-outer { position: absolute; top: 100px; bottom: 100px; left: 0; right: 0; background: #e0f7fa; overflow: hidden; }
+        #main-container { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
+        
+        #ui { padding: 5px; font-size: 20px; font-weight: bold; color: #00838f; z-index: 10; }
+        #instruction { font-size: 24px; font-weight: bold; color: #e91e63; margin-bottom: 15px; text-align: center; }
+        
+        #color-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 10px; width: 100%; max-width: 320px; }
         .color-btn { 
-            width: 90px; height: 90px; border-radius: 15px; border: none; 
-            font-size: 28px; color: white; font-weight: bold; cursor: pointer; 
+            width: 85px; height: 85px; border-radius: 15px; border: none; 
+            font-size: 16px; color: white; font-weight: bold; cursor: pointer; 
             box-shadow: 0 4px rgba(0,0,0,0.2); transition: transform 0.1s;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
         .color-btn:active { transform: scale(0.95); }
-        #end-menu { 
+
+        /* メニュー画面：スクロール対応 */
+        #menuScreen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,0.95); display: none; flex-direction: column; 
-            align-items: center; justify-content: center; z-index: 60; 
+            background: rgba(255,255,255,0.96); display: flex; flex-direction: column; 
+            align-items: center; justify-content: flex-start; z-index: 50; 
+            padding: 5px 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
         }
-        .menu-btn { width: 220px; padding: 15px; margin: 10px; font-size: 20px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
-        #retry-btn { background: #00bcd4; color: white; }
-        #more-games-btn { background: #ff4081; color: white; }
+
+        #ad-middle-container { width: 300px; height: 120px; background: #000; margin: 5px 0; display: none; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0; }
+
+        .menu-btn-group { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 8px; padding-bottom: 20px; }
+        .menu-btn { width: 220px; padding: 12px; font-size: 18px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
+        #retry-btn { background: #00bcd4; color: white; box-shadow: 0 4px #00838f; }
+        #more-games-btn { background: #ff4081; color: white; box-shadow: 0 4px #c2185b; }
     </style>
 </head>
 <body>
+
     <div id="ad-top"><iframe src="ad.html"></iframe></div>
-    <div id="ad-bottom"><iframe src="ad.html"></iframe></div>
-    <div id="main-container">
-        <div id="ui">SCORE: 0</div>
-        <div id="instruction" style="color:#e91e63;"></div> <div id="color-buttons"></div>
-        <div id="end-menu">
-            <h2 id="result-msg">Color Shuffle</h2>
-            <button id="retry-btn" class="menu-btn" onclick="startNewGame()">スタート！</button>
-            <a href="https://saaaachi.github.io/Hidden-Target/" id="more-games-btn" class="menu-btn">他のゲームはこちら</a>
+
+    <div id="game-outer">
+        <div id="main-container">
+            <div id="ui">SCORE: 0</div>
+            <div id="instruction"></div> 
+            <div id="color-buttons"></div>
+
+            <div id="menuScreen">
+                <h2 id="result-msg" style="color:#00838f; margin: 10px 0; font-size: 24px;">Color Shuffle</h2>
+                <p style="font-size: 13px; color: #666; margin: 0; text-align: center;">ボタンに書かれた「文字」ではなく<br>指示された「色」をタップしよう！</p>
+                
+                <div id="ad-middle-container">
+                    <script src="https://adm.shinobi.jp/s/1e6de436ea850948e238e975a93767eb"></script>
+                </div>
+
+                <div class="menu-btn-group">
+                    <button id="retry-btn" class="menu-btn" onclick="startNewGame()">スタート！</button>
+                    <a href="https://saaaachi.github.io/Hidden-Target/" id="more-games-btn" class="menu-btn">他のゲームはこちら</a>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div id="ad-bottom"><iframe src="ad.html"></iframe></div>
+
     <script>
         let score = 0, gameActive = false, timer;
         const colors = [
             {name: "あか", code: "#f44336"},
             {name: "あお", code: "#2196f3"},
-            {name: "きいろ", code: "#ffeb3b"},
+            {name: "きいろ", code: "#fbc02d"}, // 黄色を見やすく調整
             {name: "みどり", code: "#4caf50"},
             {name: "むらさき", code: "#9c27b0"}
         ];
-        let targetColorName; // 「あか」を探す、などの指示
-        let targetColorCode; // 実際にタップすべきボタンの色
+        let targetColorCode;
+
+        const menuScreen = document.getElementById("menuScreen");
+        const adMid = document.getElementById("ad-middle-container");
+        const resultMsg = document.getElementById("result-msg");
+        const retryBtn = document.getElementById("retry-btn");
+        const buttonsContainer = document.getElementById("color-buttons");
 
         function startNewGame() {
-            document.getElementById("end-menu").style.display = "none";
+            menuScreen.style.display = "none";
+            adMid.style.display = "none";
             score = 0; gameActive = true;
             document.getElementById("ui").innerText = "SCORE: 0";
             nextRound();
@@ -62,31 +100,31 @@
 
         function nextRound() {
             if(!gameActive) return;
-            const buttonsContainer = document.getElementById("color-buttons");
             buttonsContainer.innerHTML = "";
 
-            // ターゲットとなる色を決定
+            // ターゲットの色を決定
             const targetColorObj = colors[Math.floor(Math.random() * colors.length)];
-            targetColorName = targetColorObj.name;
-            targetColorCode = targetColorObj.code; // 今回は名前ではなく「色」をタップ
+            targetColorCode = targetColorObj.code;
 
             // 指示を更新
-            document.getElementById("instruction").innerText = `「${targetColorName}」のボタンをタップ！`;
+            document.getElementById("instruction").innerText = `「${targetColorObj.name}」の色をタップ！`;
 
-            // ボタンをシャッフルして配置
+            // ボタンをシャッフル
             const shuffledColors = [...colors].sort(() => Math.random() - 0.5);
             shuffledColors.forEach(color => {
                 const btn = document.createElement("button");
                 btn.className = "color-btn";
                 btn.style.backgroundColor = color.code;
-                btn.innerText = colors[Math.floor(Math.random() * colors.length)].name; // ボタンに表示される文字はランダム
-                btn.onclick = () => tapColor(color.code); // タップするのはボタンの背景色
+                // ボタンの文字はわざとランダムにして惑わせる
+                btn.innerText = colors[Math.floor(Math.random() * colors.length)].name;
+                
+                btn.onclick = () => tapColor(color.code);
                 buttonsContainer.appendChild(btn);
             });
 
             clearTimeout(timer);
-            // 制限時間（スコアに応じて短縮、最低1秒）
-            timer = setTimeout(() => { gameOver("時間切れ！⏳"); }, Math.max(1000, 4000 - score * 100));
+            // 制限時間（短め設定でスリルを出す）
+            timer = setTimeout(() => { gameOver("時間切れ！⏳"); }, Math.max(800, 3500 - score * 120));
         }
 
         function tapColor(tappedCode) {
@@ -102,12 +140,22 @@
 
         function gameOver(msg) {
             gameActive = false;
-            document.getElementById("result-msg").innerText = msg + "\nSCORE: " + score;
-            document.getElementById("end-menu").style.display = "flex";
-            document.getElementById("retry-btn").innerText = "もう一度遊ぶ";
+            clearTimeout(timer);
+            resultMsg.innerText = msg + "\nSCORE: " + score;
+            retryBtn.innerText = "もう一度遊ぶ";
+            adMid.style.display = "flex";
+            menuScreen.style.display = "flex";
+            menuScreen.scrollTop = 0;
         }
-        window.onload = () => { document.getElementById("end-menu").style.display = "flex"; };
-        setInterval(() => { const fs = document.querySelectorAll('iframe'); fs.forEach(f => { const s = f.src; f.src = "about:blank"; setTimeout(() => f.src = s, 100); }); }, 30000);
+
+        // 広告リフレッシュ
+        setInterval(() => {
+            const fs = document.querySelectorAll('iframe');
+            fs.forEach(f => {
+                const s = f.src; f.src = "about:blank";
+                setTimeout(() => f.src = s, 100);
+            });
+        }, 30000);
     </script>
 </body>
 </html>
