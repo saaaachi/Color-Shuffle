@@ -3,50 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Color Shuffle</title>
+    <title>Color Shuffle - Brain Training</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1299640300068792" crossorigin="anonymous"></script>
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; position: fixed; touch-action: none; }
-        body { background: #e0f7fa; font-family: sans-serif; display: flex; flex-direction: column; }
+        body { background: #e0f7fa; font-family: 'Helvetica Neue', sans-serif; display: flex; flex-direction: column; }
         
-        /* 広告枠 */
-        #ad-top, #ad-bottom { width: 100%; height: 100px; background: #333; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 100; position: relative; }
-        iframe { border: none; width: 100%; height: 100%; background: #333; }
+        /* 広告枠：100px固定（視認性重視） */
+        #ad-top, #ad-bottom { width: 100%; height: 100px; background: #006064; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
 
         #game-outer { flex-grow: 1; position: relative; width: 100%; background: #e0f7fa; overflow: hidden; }
         #main-container { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
         
-        #ui { padding: 5px; font-size: 24px; font-weight: bold; color: #00838f; z-index: 10; display: none; }
-        #instruction { font-size: 26px; font-weight: bold; color: #e91e63; margin-bottom: 20px; text-align: center; height: 1.2em; }
+        #ui { padding: 5px; font-size: 22px; font-weight: bold; color: #00838f; z-index: 10; margin-bottom: 5px; }
+        #instruction { font-size: 28px; font-weight: bold; color: #e91e63; margin-bottom: 25px; text-align: center; min-height: 1.2em; text-shadow: 1px 1px 0 #fff; }
         
-        #color-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 10px; width: 100%; max-width: 340px; }
+        /* ボタンエリアの最適化：誤タップ防止の余裕を持たせる */
+        #color-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px; width: 100%; max-width: 320px; }
         .color-btn { 
-            width: 90px; height: 90px; border-radius: 18px; border: none; 
-            font-size: 16px; color: white; font-weight: bold; cursor: pointer; 
-            box-shadow: 0 5px rgba(0,0,0,0.2); transition: transform 0.1s;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            width: 100%; aspect-ratio: 1/1; border-radius: 20px; border: none; 
+            font-size: 18px; color: white; font-weight: bold; cursor: pointer; 
+            box-shadow: 0 6px rgba(0,0,0,0.15); transition: 0.1s;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
         }
-        .color-btn:active { transform: scale(0.92); box-shadow: none; }
+        .color-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        /* メニュー画面 */
-        #menuScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.96); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; padding: 20px 0; }
-        #ad-middle-container { width: 320px; height: 100px; background: rgba(0,0,0,0.05); margin: 15px 0; display: none; justify-content: center; align-items: center; border: 1px solid #00acc1; }
+        /* メニュー/リザルト画面 */
+        #menuScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; padding: 10px; }
+        
+        /* リザルト用 300x250 レクタングル */
+        #ad-middle-box { width: 300px; height: 250px; background: #f1f8f9; margin: 20px 0; display: none; justify-content: center; align-items: center; border-radius: 15px; overflow: hidden; border: 1px solid #b2ebf2; }
 
-        .menu-btn-group { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 12px; }
-        .menu-btn { width: 260px; padding: 15px; font-size: 18px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
-        #retry-btn { background: #00838f; color: white; box-shadow: 0 4px #005662; }
-        #retry-btn:disabled { background: #ccc; opacity: 0.7; color: #666; box-shadow: none; }
-        #other-games-btn { background: #ff4081; color: white; box-shadow: 0 4px #c2185b; }
+        .btn-group { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 15px; }
+        .menu-btn { width: 260px; padding: 18px; font-size: 20px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; transition: 0.2s; }
+        #retry-btn { background: #00838f; color: white; box-shadow: 0 5px #005662; }
+        #retry-btn:disabled { background: #bbb; opacity: 0.7; color: #eee; box-shadow: none; transform: none; }
+        .link-btn { background: #ff4081; color: white; box-shadow: 0 5px #c2185b; font-size: 16px; }
 
-        /* 大広告 */
-        #bigAdScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: none; justify-content: center; align-items: center; }
-        .ad-frame-wrapper { width: 95%; height: 85%; position: relative; }
-        .ad-close-btn { position: absolute; top: -15px; right: -15px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; background: rgba(0,0,0,0.8); width: 44px; height: 44px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 3100; border: 2px solid white; }
+        /* 全画面インタースティシャル */
+        #inter-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; align-items: center; justify-content: center; }
+        .inter-content { width: 330px; height: 350px; background: #fff; position: relative; border-radius: 15px; }
+        #close-ad-btn { position: absolute; top: -55px; right: 0; width: 45px; height: 45px; background: #222; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid #fff; cursor: pointer; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="ad-top"><iframe id="frame-top" src="ad.html?pos=top"></iframe></div>
+    <div id="ad-top">
+        <ins class="adsbygoogle" style="display:inline-block;width:320px;height:100px" data-ad-client="ca-pub-1299640300068792" data-ad-slot="3972022911"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
     <div id="game-outer">
         <div id="main-container">
@@ -55,27 +61,33 @@
             <div id="color-buttons"></div>
 
             <div id="menuScreen">
-                <h2 id="result-msg" style="color:#00838f; margin: 0; font-size: 32px;">Color Shuffle</h2>
-                <p id="menu-desc" style="margin:10px 0; font-size: 15px; color: #666; text-align: center;">ボタンに書かれた「文字」ではなく<br>指示された「色」をタップしよう！</p>
+                <h2 id="result-msg" style="color:#00838f; margin: 5px 0; font-size: 32px;">Color Shuffle</h2>
+                <p id="menu-desc" style="margin:10px 0; font-size: 15px; color: #546e7a; text-align: center;">ボタンの文字ではなく、<br><b>「指示された色」</b>をタップ！</p>
                 
-                <div id="ad-middle-container">
-                    <script async src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"></script>
-                    <div id="im-1e6de436ea850948e238e975a93767eb">
-                        <script>(window.adsbyimobile=window.adsbyimobile||[]).push({pid:84561,mid:590804,asid:1924211,type:"banner",display:"inline",elementid:"im-1e6de436ea850948e238e975a93767eb"})</script>
-                    </div>
+                <div id="ad-middle-box">
+                    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-1299640300068792" data-ad-slot="9050127185"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
                 </div>
 
-                <div class="menu-btn-group">
-                    <button id="retry-btn" class="menu-btn" onclick="startNewGame()">★ スタート！ ★</button>
-                    <a href="https://saaaachi.github.io/" id="other-games-btn" class="menu-btn">他のゲームへ</a>
+                <div class="btn-group">
+                    <button id="retry-btn" class="menu-btn" onclick="startNewGame()">スタート！</button>
+                    <a href="https://saaaachi.github.io/" class="menu-btn link-btn">他のゲームで遊ぶ</a>
                 </div>
             </div>
             
-            <div id="bigAdScreen"><div class="ad-frame-wrapper"><div id="ad-close-btn" class="ad-close-btn" onclick="closeBigAd()"></div><iframe id="ad-large-frame" src="" style="width:100%; height:100%; border:none;"></iframe></div></div>
+            <div id="inter-screen">
+                <div class="inter-content">
+                    <div id="close-ad-btn" onclick="closeInterAd()">5</div>
+                    <iframe id="ifr-inter" src="about:blank" style="width:100%; height:100%; border:none; border-radius:15px; background:#fff;"></iframe>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="ad-bottom"><iframe id="frame-bottom" src="ad.html?pos=bottom"></iframe></div>
+    <div id="ad-bottom">
+        <ins class="adsbygoogle" style="display:inline-block;width:320px;height:100px" data-ad-client="ca-pub-1299640300068792" data-ad-slot="3972022911"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
     <script>
         let score = 0, gameActive = false, timer, playCount = 0;
@@ -83,17 +95,18 @@
             {name: "あか", code: "#f44336"},
             {name: "あお", code: "#2196f3"},
             {name: "きいろ", code: "#fbc02d"},
-            {name: "みどり", code: "#4caf50"},
-            {name: "むらさき", code: "#9c27b0"}
+            {name: "みどり", code: "#4caf50"}
         ];
         let targetColorCode;
 
-        const menuScreen = document.getElementById("menuScreen"), adMid = document.getElementById("ad-middle-container"), resultMsg = document.getElementById("result-msg"), retryBtn = document.getElementById("retry-btn"), buttonsContainer = document.getElementById("color-buttons"), ui = document.getElementById("ui");
+        const menuScreen = document.getElementById("menuScreen"), adMid = document.getElementById("ad-middle-box"), 
+              resultMsg = document.getElementById("result-msg"), retryBtn = document.getElementById("retry-btn"), 
+              buttonsContainer = document.getElementById("color-buttons"), ui = document.getElementById("ui");
 
         function startNewGame() {
             menuScreen.style.display = "none";
             adMid.style.display = "none";
-            ui.style.display = "block";
+            ui.style.visibility = "visible";
             score = 0; ui.innerText = "SCORE: 0";
             gameActive = true;
             nextRound();
@@ -106,18 +119,22 @@
             targetColorCode = targetColorObj.code;
             document.getElementById("instruction").innerText = `「${targetColorObj.name}」の色をタップ！`;
 
-            const shuffledColors = [...colors].sort(() => Math.random() - 0.5);
-            shuffledColors.forEach(color => {
+            // 4つのボタンを生成（位置を毎回シャッフル）
+            const shuffledCodes = [...colors].sort(() => Math.random() - 0.5);
+            shuffledCodes.forEach(color => {
                 const btn = document.createElement("button");
                 btn.className = "color-btn";
                 btn.style.backgroundColor = color.code;
+                // ストループ効果：ボタンの文字をランダムな色の名前にする
                 btn.innerText = colors[Math.floor(Math.random() * colors.length)].name;
                 btn.onclick = () => tapColor(color.code);
                 buttonsContainer.appendChild(btn);
             });
 
+            // 難易度調整：スコアが上がるほど制限時間が短くなる
             clearTimeout(timer);
-            timer = setTimeout(() => { gameOver("時間切れ！⏳"); }, Math.max(800, 3500 - score * 120));
+            const timeLimit = Math.max(700, 3000 - score * 100);
+            timer = setTimeout(() => { gameOver("時間切れ！⏳"); }, timeLimit);
         }
 
         function tapColor(tappedCode) {
@@ -125,31 +142,60 @@
             if(tappedCode === targetColorCode) {
                 score++; ui.innerText = "SCORE: " + score;
                 nextRound();
-            } else { gameOver("違う色だよ！😱"); }
+            } else { 
+                gameOver("違う色だよ！😱"); 
+            }
         }
 
         function gameOver(msg) {
             gameActive = false; playCount++; clearTimeout(timer);
             resultMsg.innerText = "GAME OVER";
-            document.getElementById("menu-desc").innerText = msg + "\nSCORE: " + score;
-            retryBtn.innerText = "お待ちください..."; retryBtn.disabled = true;
-            adMid.style.display = "flex"; menuScreen.style.display = "flex";
-            setTimeout(() => { retryBtn.disabled = false; retryBtn.innerText = "もう一度遊ぶ"; }, 1500);
-            if(playCount % 2 === 0) setTimeout(showBigAd, 500);
+            document.getElementById("menu-desc").innerHTML = msg + "<br>最終記録: " + score;
+            
+            retryBtn.innerText = "お待ちください..."; 
+            retryBtn.disabled = true;
+            adMid.style.display = "flex"; 
+            menuScreen.style.display = "flex";
+
+            // リトライボタン有効化（誤クリック防止）
+            setTimeout(() => { 
+                retryBtn.disabled = false; 
+                retryBtn.innerText = "もう一度挑戦！"; 
+            }, 1500);
+
+            // インタースティシャル広告（4回毎に表示）
+            if(playCount % 4 === 0) {
+                setTimeout(showInterAd, 500);
+            }
         }
 
-        function showBigAd() {
-            const screen = document.getElementById("bigAdScreen"), closeBtn = document.getElementById("ad-close-btn");
-            document.getElementById("ad-large-frame").src = "./ad.large.html?t=" + Date.now();
+        function showInterAd() {
+            const screen = document.getElementById("inter-screen"), 
+                  closeBtn = document.getElementById("close-ad-btn"),
+                  ifr = document.getElementById('ifr-inter');
+            ifr.src = './ad.large.html?v=' + Date.now();
             screen.style.display = "flex";
-            let countdown = 5; closeBtn.style.display = "flex"; closeBtn.innerText = countdown; closeBtn.style.pointerEvents = "none";
+            
+            let countdown = 5;
+            closeBtn.innerText = countdown;
+            closeBtn.style.pointerEvents = "none";
+            
             const timerInt = setInterval(() => {
-                countdown--; closeBtn.innerText = countdown;
-                if (countdown <= 0) { clearInterval(timerInt); closeBtn.innerText = "×"; closeBtn.style.pointerEvents = "auto"; }
+                countdown--;
+                if (countdown > 0) {
+                    closeBtn.innerText = countdown;
+                } else {
+                    clearInterval(timerInt);
+                    closeBtn.innerText = "×";
+                    closeBtn.style.pointerEvents = "auto";
+                }
             }, 1000);
         }
 
-        function closeBigAd() { document.getElementById("bigAdScreen").style.display = "none"; }
+        function closeInterAd() {
+            document.getElementById("inter-screen").style.display = "none";
+            document.getElementById('ifr-inter').src = 'about:blank';
+        }
     </script>
 </body>
 </html>
