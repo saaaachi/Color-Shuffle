@@ -10,16 +10,16 @@
         html, body { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; position: fixed; touch-action: none; }
         body { background: #e0f7fa; font-family: 'Helvetica Neue', sans-serif; display: flex; flex-direction: column; }
         
-        /* 広告枠：100px固定（視認性重視） */
-        #ad-top, #ad-bottom { width: 100%; height: 100px; background: #006064; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
+        /* 上部広告：100px固定 */
+        #ad-top { width: 100%; height: 100px; background: #006064; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 100; border-bottom: 3px solid #00838f; }
 
+        /* ゲームエリア：下端まで開放 */
         #game-outer { flex-grow: 1; position: relative; width: 100%; background: #e0f7fa; overflow: hidden; }
         #main-container { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
         
         #ui { padding: 5px; font-size: 22px; font-weight: bold; color: #00838f; z-index: 10; margin-bottom: 5px; }
         #instruction { font-size: 28px; font-weight: bold; color: #e91e63; margin-bottom: 25px; text-align: center; min-height: 1.2em; text-shadow: 1px 1px 0 #fff; }
         
-        /* ボタンエリアの最適化：誤タップ防止の余裕を持たせる */
         #color-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px; width: 100%; max-width: 320px; }
         .color-btn { 
             width: 100%; aspect-ratio: 1/1; border-radius: 20px; border: none; 
@@ -32,16 +32,15 @@
         /* メニュー/リザルト画面 */
         #menuScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; padding: 10px; }
         
-        /* リザルト用 300x250 レクタングル */
         #ad-middle-box { width: 300px; height: 250px; background: #f1f8f9; margin: 20px 0; display: none; justify-content: center; align-items: center; border-radius: 15px; overflow: hidden; border: 1px solid #b2ebf2; }
 
         .btn-group { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 15px; }
         .menu-btn { width: 260px; padding: 18px; font-size: 20px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; transition: 0.2s; }
         #retry-btn { background: #00838f; color: white; box-shadow: 0 5px #005662; }
+        #retry-btn:active { transform: translateY(2px); box-shadow: 0 3px #005662; }
         #retry-btn:disabled { background: #bbb; opacity: 0.7; color: #eee; box-shadow: none; transform: none; }
         .link-btn { background: #ff4081; color: white; box-shadow: 0 5px #c2185b; font-size: 16px; }
 
-        /* 全画面インタースティシャル */
         #inter-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; align-items: center; justify-content: center; }
         .inter-content { width: 330px; height: 350px; background: #fff; position: relative; border-radius: 15px; }
         #close-ad-btn { position: absolute; top: -55px; right: 0; width: 45px; height: 45px; background: #222; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid #fff; cursor: pointer; }
@@ -84,11 +83,6 @@
         </div>
     </div>
 
-    <div id="ad-bottom">
-        <ins class="adsbygoogle" style="display:inline-block;width:320px;height:100px" data-ad-client="ca-pub-1299640300068792" data-ad-slot="3972022911"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
     <script>
         let score = 0, gameActive = false, timer, playCount = 0;
         const colors = [
@@ -119,19 +113,16 @@
             targetColorCode = targetColorObj.code;
             document.getElementById("instruction").innerText = `「${targetColorObj.name}」の色をタップ！`;
 
-            // 4つのボタンを生成（位置を毎回シャッフル）
             const shuffledCodes = [...colors].sort(() => Math.random() - 0.5);
             shuffledCodes.forEach(color => {
                 const btn = document.createElement("button");
                 btn.className = "color-btn";
                 btn.style.backgroundColor = color.code;
-                // ストループ効果：ボタンの文字をランダムな色の名前にする
                 btn.innerText = colors[Math.floor(Math.random() * colors.length)].name;
                 btn.onclick = () => tapColor(color.code);
                 buttonsContainer.appendChild(btn);
             });
 
-            // 難易度調整：スコアが上がるほど制限時間が短くなる
             clearTimeout(timer);
             const timeLimit = Math.max(700, 3000 - score * 100);
             timer = setTimeout(() => { gameOver("時間切れ！⏳"); }, timeLimit);
@@ -157,13 +148,11 @@
             adMid.style.display = "flex"; 
             menuScreen.style.display = "flex";
 
-            // リトライボタン有効化（誤クリック防止）
             setTimeout(() => { 
                 retryBtn.disabled = false; 
                 retryBtn.innerText = "もう一度挑戦！"; 
             }, 1500);
 
-            // インタースティシャル広告（4回毎に表示）
             if(playCount % 4 === 0) {
                 setTimeout(showInterAd, 500);
             }
